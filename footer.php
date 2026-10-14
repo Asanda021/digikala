@@ -8,6 +8,10 @@ defined( 'ABSPATH' ) || exit;
 ?>
 <footer class="site-footer" id="colophon">
     <div class="container">
+        <div class="footer-toolbar">
+            <span class="footer-brand-mini"><?php echo esc_html( get_bloginfo( 'name' ) ); ?></span>
+            <button class="back-to-top" type="button"><?php esc_html_e( 'بازگشت به بالا ↑', 'bazarnama' ); ?></button>
+        </div>
         <div class="footer-layout">
             <div class="footer-about">
                 <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="footer-brand"><?php echo esc_html( get_bloginfo( 'name' ) ); ?></a>

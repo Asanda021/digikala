@@ -54,9 +54,46 @@ defined( 'ABSPATH' ) || exit;
     </div>
     <nav class="header-nav" id="primary-navigation" aria-label="<?php esc_attr_e( 'فهرست اصلی', 'bazarnama' ); ?>">
         <div class="container nav-row">
-            <a class="nav-highlight" href="<?php echo esc_url( bazarnama_shop_url() ); ?>"><span class="menu-bars" aria-hidden="true">☷</span><?php esc_html_e( 'دسته‌بندی کالاها', 'bazarnama' ); ?></a>
+            <div class="category-nav-wrap">
+                <button class="nav-highlight category-toggle" type="button" aria-controls="shop-category-panel" aria-expanded="false">
+                    <span class="menu-bars" aria-hidden="true">☷</span><?php esc_html_e( 'دسته‌بندی کالاها', 'bazarnama' ); ?><span aria-hidden="true">⌄</span>
+                </button>
+                <div class="category-panel" id="shop-category-panel" hidden>
+                    <strong class="category-panel-title"><?php esc_html_e( 'دسته‌بندی محصولات', 'bazarnama' ); ?></strong>
+                    <div class="category-panel-links">
+                        <?php
+                        if ( taxonomy_exists( 'product_cat' ) ) :
+                            $header_categories = get_terms( array(
+                                'taxonomy'   => 'product_cat',
+                                'hide_empty' => true,
+                                'number'     => 12,
+                                'orderby'    => 'count',
+                                'order'      => 'DESC',
+                                'exclude'    => array_filter( array( (int) get_option( 'default_product_cat', 0 ) ) ),
+                            ) );
+                            if ( ! is_wp_error( $header_categories ) ) :
+                                foreach ( $header_categories as $header_category ) :
+                                    $header_category_url = get_term_link( $header_category );
+                                    if ( is_wp_error( $header_category_url ) ) { continue; }
+                                    ?>
+                                    <a href="<?php echo esc_url( $header_category_url ); ?>"><span aria-hidden="true">◈</span><?php echo esc_html( $header_category->name ); ?><span aria-hidden="true">←</span></a>
+                                    <?php
+                                endforeach;
+                            endif;
+                        endif;
+                        ?>
+                        <a class="category-all" href="<?php echo esc_url( bazarnama_shop_url() ); ?>"><?php esc_html_e( 'مشاهده همه محصولات', 'bazarnama' ); ?><span aria-hidden="true">←</span></a>
+                    </div>
+                </div>
+            </div>
             <?php wp_nav_menu( array( 'theme_location' => 'primary', 'container' => false, 'menu_class' => 'primary-menu', 'fallback_cb' => 'bazarnama_nav_fallback', 'depth' => 2 ) ); ?>
             <span class="nav-location"><?php esc_html_e( 'خرید آنلاین، در هر کجا', 'bazarnama' ); ?></span>
         </div>
     </nav>
 </header>
+<nav class="mobile-bottom-nav" aria-label="<?php esc_attr_e( 'دسترسی سریع موبایل', 'bazarnama' ); ?>">
+    <a href="<?php echo esc_url( home_url( '/' ) ); ?>"<?php echo is_front_page() ? ' aria-current="page"' : ''; ?>><span aria-hidden="true">⌂</span><?php esc_html_e( 'خانه', 'bazarnama' ); ?></a>
+    <a href="<?php echo esc_url( bazarnama_shop_url() ); ?>"><span aria-hidden="true">▦</span><?php esc_html_e( 'فروشگاه', 'bazarnama' ); ?></a>
+    <a href="<?php echo esc_url( bazarnama_cart_url() ); ?>"><span aria-hidden="true">🛒</span><?php esc_html_e( 'سبد خرید', 'bazarnama' ); ?></a>
+    <a href="<?php echo esc_url( bazarnama_account_url() ); ?>"><span aria-hidden="true">♙</span><?php esc_html_e( 'حساب من', 'bazarnama' ); ?></a>
+</nav>

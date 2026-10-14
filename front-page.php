@@ -10,28 +10,35 @@ $shop_url = bazarnama_shop_url();
 ?>
 <main id="primary" class="site-main home-main">
     <div class="container">
+        <div class="store-intro"><span>✦ <?php esc_html_e( 'یک انتخاب خوب، یک خرید آسان', 'bazarnama' ); ?></span><a href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'همه محصولات ←', 'bazarnama' ); ?></a></div>
         <section class="home-hero" aria-label="<?php esc_attr_e( 'پیشنهادهای فروشگاه', 'bazarnama' ); ?>">
             <div class="hero-primary">
                 <div class="hero-copy">
                     <span class="hero-eyebrow"><?php esc_html_e( 'خوش آمدید به فروشگاه ما', 'bazarnama' ); ?></span>
                     <h1><?php echo esc_html( get_theme_mod( 'bazarnama_hero_title', 'خریدی جذاب برای هر سلیقه' ) ); ?></h1>
                     <p><?php echo esc_html( get_theme_mod( 'bazarnama_hero_body', 'جدیدترین محصولات را با خیال راحت انتخاب کنید.' ) ); ?></p>
-                    <a class="button-light" href="<?php echo esc_url( $shop_url ); ?>"><?php echo esc_html( get_theme_mod( 'bazarnama_hero_button', 'مشاهده محصولات' ) ); ?> ←</a>
+                    <a class="button-light" href="<?php echo esc_url( get_theme_mod( 'bazarnama_hero_link', '' ) ?: $shop_url ); ?>"><?php echo esc_html( get_theme_mod( 'bazarnama_hero_button', 'مشاهده محصولات' ) ); ?> ←</a>
                 </div>
                 <div class="hero-art" aria-hidden="true"><div class="hero-box"></div></div>
             </div>
             <div class="hero-side">
-                <a class="promo-tile promo-violet" href="<?php echo esc_url( $shop_url ); ?>">
-                    <strong><?php esc_html_e( 'انتخاب‌های تازه برای شما', 'bazarnama' ); ?></strong>
+                <a class="promo-tile promo-violet" href="<?php echo esc_url( get_theme_mod( 'bazarnama_promo_one_link', '' ) ?: $shop_url ); ?>">
+                    <strong><?php echo esc_html( get_theme_mod( 'bazarnama_promo_one_title', 'انتخاب‌های تازه برای شما' ) ); ?></strong>
                     <span><?php esc_html_e( 'کشف محصولات فروشگاه ←', 'bazarnama' ); ?></span>
                 </a>
-                <a class="promo-tile promo-mint" href="<?php echo esc_url( $shop_url ); ?>">
-                    <strong><?php esc_html_e( 'خرید ساده، انتخاب بهتر', 'bazarnama' ); ?></strong>
+                <a class="promo-tile promo-mint" href="<?php echo esc_url( get_theme_mod( 'bazarnama_promo_two_link', '' ) ?: $shop_url ); ?>">
+                    <strong><?php echo esc_html( get_theme_mod( 'bazarnama_promo_two_title', 'خرید ساده، انتخاب بهتر' ) ); ?></strong>
                     <span><?php esc_html_e( 'دیدن همه کالاها ←', 'bazarnama' ); ?></span>
                 </a>
             </div>
         </section>
 
+        <div class="quick-benefits" aria-label="<?php esc_attr_e( 'ویژگی‌های خرید', 'bazarnama' ); ?>">
+            <span><b aria-hidden="true">⌕</b><?php esc_html_e( 'جست‌وجوی آسان', 'bazarnama' ); ?></span>
+            <span><b aria-hidden="true">▦</b><?php esc_html_e( 'دسته‌بندی هوشمند', 'bazarnama' ); ?></span>
+            <span><b aria-hidden="true">▤</b><?php esc_html_e( 'سبد خرید یکپارچه', 'bazarnama' ); ?></span>
+            <span><b aria-hidden="true">◈</b><?php esc_html_e( 'پیگیری سفارش', 'bazarnama' ); ?></span>
+        </div>
         <?php if ( class_exists( 'WooCommerce' ) ) : ?>
             <?php
             $categories = get_terms( array(
