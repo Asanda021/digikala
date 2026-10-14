@@ -87,7 +87,11 @@ add_action( 'woocommerce_thankyou', 'bazarnama_thankyou_followup', 20 );
 /** Account and order pages must not be cached publicly by full-page caches. */
 function bazarnama_customer_no_cache() {
     if ( ! class_exists( 'WooCommerce' ) || ! function_exists( 'wc_setcookie' ) ) { return; }
-    if ( ( function_exists( 'is_account_page' ) && is_account_page() ) || ( function_exists( 'is_checkout' ) && is_checkout() ) || ( function_exists( 'is_cart' ) && is_cart() ) ) {
+    $tracking_view = function_exists( 'bazarnama_filter_value' ) && is_front_page()
+        && 'track' === bazarnama_filter_value( 'bn_view' );
+    if ( $tracking_view || ( function_exists( 'is_account_page' ) && is_account_page() )
+        || ( function_exists( 'is_checkout' ) && is_checkout() )
+        || ( function_exists( 'is_cart' ) && is_cart() ) ) {
         if ( ! defined( 'DONOTCACHEPAGE' ) ) { define( 'DONOTCACHEPAGE', true ); }
         nocache_headers();
     }
