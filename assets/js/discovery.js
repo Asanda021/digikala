@@ -6,6 +6,7 @@
   var limits = { wishlist: 40, compare: 4 }, memory = { wishlist: [], compare: [] };
   var persistent = true;
   function read(type) {
+    if (!persistent) return memory[type].slice();
     try {
       var items = JSON.parse(localStorage.getItem(keys[type]) || '[]');
       if (!Array.isArray(items)) return [];
@@ -82,7 +83,9 @@
           (data.products || []).forEach(function (product) { suggestions.appendChild(productLink(product)); });
           if (!(data.products || []).length) suggestions.appendChild(el('p', 'bn-empty-small', labels.noResults));
           suggestions.hidden = false;
-        }).catch(function (err) { if (err.name !== 'AbortError') suggestions.hidden = true; });
+        }).catch(function (err) {
+          if (err.name !== 'AbortError' && search.value.trim() === term) suggestions.hidden = true;
+        });
       }, 250);
     });
     search.addEventListener('keydown', function (event) {
@@ -103,7 +106,7 @@
   function renderTable(products, target) {
     var wrap = el('div', 'bn-compare-scroll'), table = el('table', 'bn-compare-table');
     var headings = [ ['price', 'قیمت'], ['stock', 'موجودی'], ['sku', 'شناسه کالا'] ];
-    var attrs = {};
+    var attrs = Object.create(null);
     products.forEach(function (product) {
       (product.attributes || []).forEach(function (attribute) { attrs[attribute.name] = true; });
     });
@@ -126,8 +129,10 @@
     });
     wrap.appendChild(table); target.appendChild(wrap);
   }
+  var collectionRequestVersion = 0;
   function renderPage() {
     if (!page) return;
+    var requestVersion = ++collectionRequestVersion;
     var type = page.getAttribute('data-bn-page'), target = document.getElementById('bn-collection-results');
     var ids = read(type); target.replaceChildren();
     if (!ids.length) {
@@ -136,6 +141,7 @@
     }
     target.appendChild(el('p', 'bn-collection-loading', 'در حال دریافت اطلاعات...'));
     send('bazarnama_products', { ids: ids }).then(function (data) {
+      if (requestVersion !== collectionRequestVersion) return;
       target.replaceChildren();
       var products = data.products || [], valid = products.map(function (p) { return Number(p.id); });
       if (JSON.stringify(ids) !== JSON.stringify(valid)) { save(type, valid); syncButtons(); }
@@ -154,10 +160,14 @@
         });
         target.appendChild(grid);
       }
-    }).catch(function () { target.replaceChildren(el('p', 'bn-collection-empty', labels.error)); });
+    }).catch(function () {
+      if (requestVersion !== collectionRequestVersion) return;
+      target.replaceChildren(el('p', 'bn-collection-empty', labels.error));
+    });
   }
   document.addEventListener('click', function (event) {
-    var button = event.target.closest('[data-bn-collection][data-product-id]');
+    var button = event.target && typeof event.target.closest === 'function'
+      ? event.target.closest('[data-bn-collection][data-product-id]') : null;
     if (!button) return;
     var type = button.getAttribute('data-bn-collection');
     var id = Number(button.getAttribute('data-product-id'));
