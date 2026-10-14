@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
         <div class="footer-layout">
             <div class="footer-about">
                 <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="footer-brand"><?php echo esc_html( get_bloginfo( 'name' ) ); ?></a>
-                <p><?php echo esc_html( get_bloginfo( 'description' ) ?: 'فروشگاه اینترنتی شما، با تجربه خرید ساده و دلپذیر.' ); ?></p>
+                <p><?php echo esc_html( get_theme_mod( 'bazarnama_footer_description', 'فروشگاه اینترنتی شما، با تجربه خرید ساده و دلپذیر.' ) ); ?></p>
             </div>
             <div class="footer-menu">
                 <h3><?php esc_html_e( 'دسترسی سریع', 'bazarnama' ); ?></h3>
