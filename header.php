@@ -67,29 +67,46 @@ defined( 'ABSPATH' ) || exit;
                 </button>
                 <div class="category-panel" id="shop-category-panel" hidden>
                     <strong class="category-panel-title"><?php esc_html_e( 'دسته‌بندی محصولات', 'bazarnama' ); ?></strong>
-                    <div class="category-panel-links">
+                    <div class="category-panel-links bn-mega-grid">
                         <?php
                         if ( taxonomy_exists( 'product_cat' ) ) :
-                            $header_categories = get_terms( array(
+                            $parent_categories = get_terms( array(
                                 'taxonomy'   => 'product_cat',
                                 'hide_empty' => true,
-                                'number'     => 12,
+                                'parent'     => 0,
+                                'number'     => 9,
                                 'orderby'    => 'count',
                                 'order'      => 'DESC',
                                 'exclude'    => array_filter( array( (int) get_option( 'default_product_cat', 0 ) ) ),
                             ) );
-                            if ( ! is_wp_error( $header_categories ) ) :
-                                foreach ( $header_categories as $header_category ) :
-                                    $header_category_url = get_term_link( $header_category );
-                                    if ( is_wp_error( $header_category_url ) ) { continue; }
+                            if ( ! is_wp_error( $parent_categories ) ) :
+                                foreach ( $parent_categories as $parent_category ) :
+                                    $parent_url = get_term_link( $parent_category );
+                                    if ( is_wp_error( $parent_url ) ) { continue; }
+                                    $children = get_terms( array(
+                                        'taxonomy' => 'product_cat',
+                                        'hide_empty' => true,
+                                        'parent' => (int) $parent_category->term_id,
+                                        'number' => 6,
+                                        'orderby' => 'name',
+                                        'order' => 'ASC',
+                                    ) );
                                     ?>
-                                    <a href="<?php echo esc_url( $header_category_url ); ?>"><span aria-hidden="true">◈</span><?php echo esc_html( $header_category->name ); ?><span aria-hidden="true">←</span></a>
+                                    <section class="bn-mega-group">
+                                        <a class="bn-mega-parent" href="<?php echo esc_url( $parent_url ); ?>"><span aria-hidden="true">◈</span><?php echo esc_html( $parent_category->name ); ?><span aria-hidden="true">←</span></a>
+                                        <?php if ( ! is_wp_error( $children ) ) : ?>
+                                            <?php foreach ( $children as $child ) : ?>
+                                                <?php $child_url = get_term_link( $child ); if ( is_wp_error( $child_url ) ) { continue; } ?>
+                                                <a class="bn-mega-child" href="<?php echo esc_url( $child_url ); ?>"><?php echo esc_html( $child->name ); ?></a>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </section>
                                     <?php
                                 endforeach;
                             endif;
                         endif;
                         ?>
-                        <a class="category-all" href="<?php echo esc_url( bazarnama_shop_url() ); ?>"><?php esc_html_e( 'مشاهده همه محصولات', 'bazarnama' ); ?><span aria-hidden="true">←</span></a>
+                        <a class="category-all bn-mega-all" href="<?php echo esc_url( bazarnama_shop_url() ); ?>"><?php esc_html_e( 'مشاهده همه محصولات', 'bazarnama' ); ?><span aria-hidden="true">←</span></a>
                     </div>
                 </div>
             </div>
