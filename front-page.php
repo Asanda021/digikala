@@ -10,7 +10,9 @@ $shop_url = bazarnama_shop_url();
 ?>
 <main id="primary" class="site-main home-main">
     <div class="container">
+        <?php if ( get_theme_mod( 'bazarnama_show_intro', true ) ) : ?>
         <div class="store-intro"><span>✦ <?php esc_html_e( 'یک انتخاب خوب، یک خرید آسان', 'bazarnama' ); ?></span><a href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'همه محصولات ←', 'bazarnama' ); ?></a></div>
+        <?php endif; ?>
         <section class="home-hero" aria-label="<?php esc_attr_e( 'پیشنهادهای فروشگاه', 'bazarnama' ); ?>">
             <div class="hero-primary">
                 <div class="hero-copy">
@@ -19,7 +21,12 @@ $shop_url = bazarnama_shop_url();
                     <p><?php echo esc_html( get_theme_mod( 'bazarnama_hero_body', 'جدیدترین محصولات را با خیال راحت انتخاب کنید.' ) ); ?></p>
                     <a class="button-light" href="<?php echo esc_url( get_theme_mod( 'bazarnama_hero_link', '' ) ?: $shop_url ); ?>"><?php echo esc_html( get_theme_mod( 'bazarnama_hero_button', 'مشاهده محصولات' ) ); ?> ←</a>
                 </div>
-                <div class="hero-art" aria-hidden="true"><div class="hero-box"></div></div>
+                <?php $hero_media = absint( get_theme_mod( 'bazarnama_hero_image', 0 ) ); ?>
+                <?php if ( $hero_media && wp_attachment_is_image( $hero_media ) ) : ?>
+                    <div class="bn-hero-upload"><?php echo wp_get_attachment_image( $hero_media, 'large', false, array( 'class' => 'bn-hero-photo', 'loading' => 'eager', 'fetchpriority' => 'high' ) ); ?></div>
+                <?php else : ?>
+                    <div class="hero-art" aria-hidden="true"><div class="hero-box"></div></div>
+                <?php endif; ?>
             </div>
             <div class="hero-side">
                 <a class="promo-tile promo-violet" href="<?php echo esc_url( get_theme_mod( 'bazarnama_promo_one_link', '' ) ?: $shop_url ); ?>">
@@ -50,7 +57,7 @@ $shop_url = bazarnama_shop_url();
                 'exclude'    => array( (int) get_option( 'default_product_cat', 0 ) ),
             ) );
             ?>
-            <?php if ( ! is_wp_error( $categories ) && ! empty( $categories ) ) : ?>
+            <?php if ( get_theme_mod( 'bazarnama_show_categories', true ) && ! is_wp_error( $categories ) && ! empty( $categories ) ) : ?>
             <section class="section-block" aria-labelledby="cat-title">
                 <div class="section-heading"><h2 id="cat-title"><?php esc_html_e( 'دسته‌بندی‌های محبوب', 'bazarnama' ); ?></h2><a href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'تمام محصولات ←', 'bazarnama' ); ?></a></div>
                 <div class="category-grid">
@@ -82,7 +89,7 @@ $shop_url = bazarnama_shop_url();
             $sale_ids = array_values( array_filter( array_map( 'absint', (array) $sale_ids ) ) );
             $sale_ids = array_slice( $sale_ids, 0, 30 );
             ?>
-            <?php if ( $sale_ids ) : ?>
+            <?php if ( get_theme_mod( 'bazarnama_show_sale', true ) && $sale_ids ) : ?>
             <section class="sale-band" aria-labelledby="sale-title">
                 <div class="sale-intro"><span class="sale-symbol" aria-hidden="true">✦</span><strong id="sale-title"><?php esc_html_e( 'پیشنهاد شگفت‌انگیز', 'bazarnama' ); ?></strong><a href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'دیدن همه ←', 'bazarnama' ); ?></a></div>
                 <div><?php bazarnama_product_grid( array( 'post__in' => $sale_ids, 'orderby' => 'post__in', 'posts_per_page' => 4 ) ); ?></div>

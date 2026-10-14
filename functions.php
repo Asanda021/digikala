@@ -7,7 +7,7 @@
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'BAZARNAMA_VERSION' ) ) {
-    define( 'BAZARNAMA_VERSION', '1.3.0' );
+    define( 'BAZARNAMA_VERSION', '1.4.0' );
 }
 
 function bazarnama_setup() {
@@ -35,6 +35,7 @@ add_action( 'after_setup_theme', 'bazarnama_setup' );
 function bazarnama_assets() {
     wp_enqueue_style( 'bazarnama-style', get_stylesheet_uri(), array(), BAZARNAMA_VERSION );
     wp_enqueue_style( 'bazarnama-design-v2', get_template_directory_uri() . '/assets/css/design-v2.css', array( 'bazarnama-style' ), BAZARNAMA_VERSION );
+    wp_enqueue_style( 'bazarnama-settings', get_template_directory_uri() . '/assets/css/store-settings.css', array( 'bazarnama-design-v2' ), BAZARNAMA_VERSION );
     wp_enqueue_script( 'bazarnama-main', get_template_directory_uri() . '/assets/js/main.js', array(), BAZARNAMA_VERSION, true );
 }
 add_action( 'wp_enqueue_scripts', 'bazarnama_assets' );
@@ -148,3 +149,8 @@ require_once get_template_directory() . '/inc/discovery.php';
 
 /** Phase 5: native account, order tracking, fulfillment and checkout UX. */
 require_once get_template_directory() . '/inc/customer-journey.php';
+
+require_once get_template_directory() . '/inc/store-settings.php';
+
+/** Phase 7: SEO metadata, conditional styles and security guards. */
+require_once get_template_directory() . '/inc/hardening.php';

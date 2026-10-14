@@ -76,7 +76,8 @@ add_action( 'wp_ajax_bazarnama_search', 'bazarnama_ajax_search' );
 add_action( 'wp_ajax_nopriv_bazarnama_search', 'bazarnama_ajax_search' );
 function bazarnama_ajax_products() {
     bazarnama_discovery_nonce();
-    $raw_ids = isset( $_POST['ids'] ) && is_array( $_POST['ids'] ) ? wp_unslash( $_POST['ids'] ) : array();
+    // Bound input size before normalization to limit request work.
+    $raw_ids = isset( $_POST['ids'] ) && is_array( $_POST['ids'] ) ? array_slice( wp_unslash( $_POST['ids'] ), 0, 40 ) : array();
     $ids = array_slice( array_unique( array_filter( array_map( 'absint', $raw_ids ) ) ), 0, 40 );
     $items = array();
     foreach ( $ids as $id ) {
@@ -98,10 +99,10 @@ function bazarnama_filter_catalog( $query ) {
     $min = bazarnama_filter_value( 'bn_min_price' );
     $max = bazarnama_filter_value( 'bn_max_price' );
     $meta = (array) $query->get( 'meta_query' );
-    if ( '' !== $min && is_numeric( $min ) && (float) $min >= 0 ) {
+    if ( '' !== $min && is_numeric( $min ) && (float) $min >= 0 && (float) $min <= 1000000000000 ) {
         $meta[] = array( 'key' => '_price', 'value' => (float) wc_format_decimal( $min ), 'compare' => '>=', 'type' => 'DECIMAL(18,6)' );
     }
-    if ( '' !== $max && is_numeric( $max ) && (float) $max >= 0 ) {
+    if ( '' !== $max && is_numeric( $max ) && (float) $max >= 0 && (float) $max <= 1000000000000 ) {
         $meta[] = array( 'key' => '_price', 'value' => (float) wc_format_decimal( $max ), 'compare' => '<=', 'type' => 'DECIMAL(18,6)' );
     }
     if ( '1' === bazarnama_filter_value( 'bn_stock' ) ) {
