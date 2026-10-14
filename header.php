@@ -39,8 +39,15 @@ defined( 'ABSPATH' ) || exit;
                 <input id="header-search-input" type="search" name="s" placeholder="<?php esc_attr_e( 'جست‌وجو در محصولات...', 'bazarnama' ); ?>" value="<?php echo esc_attr( get_search_query() ); ?>">
                 <?php if ( class_exists( 'WooCommerce' ) ) : ?><input type="hidden" name="post_type" value="product"><?php endif; ?>
             </form>
+            <?php if ( class_exists( 'WooCommerce' ) ) : ?>
+                <div class="bn-search-suggestions" id="bn-search-suggestions" role="status" aria-live="polite" hidden></div>
+            <?php endif; ?>
         </div>
         <div class="header-actions">
+            <?php if ( class_exists( 'WooCommerce' ) ) : ?>
+                <a class="action-link bn-head-collection" href="<?php echo esc_url( add_query_arg( 'bn_view', 'wishlist', home_url( '/' ) ) ); ?>" aria-label="<?php esc_attr_e( 'علاقه‌مندی‌ها', 'bazarnama' ); ?>" title="<?php esc_attr_e( 'علاقه‌مندی‌ها', 'bazarnama' ); ?>">♡</a>
+                <a class="action-link bn-head-collection" href="<?php echo esc_url( add_query_arg( 'bn_view', 'compare', home_url( '/' ) ) ); ?>" aria-label="<?php esc_attr_e( 'مقایسه محصولات', 'bazarnama' ); ?>" title="<?php esc_attr_e( 'مقایسه محصولات', 'bazarnama' ); ?>">⊞</a>
+            <?php endif; ?>
             <a class="action-link account-link" href="<?php echo esc_url( bazarnama_account_url() ); ?>">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 9h8M8 14h5"/></svg>
                 <?php echo is_user_logged_in() ? esc_html__( 'حساب کاربری', 'bazarnama' ) : esc_html__( 'ورود | ثبت‌نام', 'bazarnama' ); ?>

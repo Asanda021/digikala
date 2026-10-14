@@ -142,3 +142,6 @@ require_once get_template_directory() . '/inc/design-customizer.php';
 
 /** Phase 3: native WooCommerce catalog, cart and product helpers. */
 require_once get_template_directory() . '/inc/commerce.php';
+
+/** Phase 4 discovery features, safely deactivated without WooCommerce. */
+require_once get_template_directory() . '/inc/discovery.php';

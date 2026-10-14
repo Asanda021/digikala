@@ -26,4 +26,8 @@ $in_stock   = $product->is_in_stock();
         <span class="bn-stock-state <?php echo $in_stock ? 'available' : 'unavailable'; ?>"><?php echo esc_html( $in_stock ? __( 'موجود', 'bazarnama' ) : __( 'ناموجود', 'bazarnama' ) ); ?></span>
     </a>
     <div class="product-card-actions"><?php woocommerce_template_loop_add_to_cart(); ?></div>
+    <div class="bn-collection-buttons">
+        <button class="bn-collection-btn" type="button" data-bn-collection="wishlist" data-product-id="<?php echo esc_attr( (string) $product_id ); ?>" aria-pressed="false"><?php esc_html_e( '♡ علاقه‌مندی', 'bazarnama' ); ?></button>
+        <button class="bn-collection-btn" type="button" data-bn-collection="compare" data-product-id="<?php echo esc_attr( (string) $product_id ); ?>" aria-pressed="false"><?php esc_html_e( '⊞ مقایسه', 'bazarnama' ); ?></button>
+    </div>
 </li>
