@@ -17,4 +17,5 @@ while IFS= read -r -d '' file; do
   node --check "$file"
   echo "JS OK $file"
 done < <(find assets/js -type f -name '*.js' -print0)
+node scripts/security-compat-check.mjs
 echo "STATIC PASS ONLY. WordPress and checkout runtime tests are required."

@@ -66,30 +66,65 @@ function bazarnama_account_url() {
  * Output the theme-owned product grid, using actual published WC products.
  */
 function bazarnama_product_grid( $args = array() ) {
-    if ( ! class_exists( 'WooCommerce' ) ) {
+    if ( ! class_exists( 'WooCommerce' ) || ! function_exists( 'wc_get_products' ) ) {
         return false;
     }
-    $query = new WP_Query( array_merge( array(
-        'post_type'      => 'product',
-        'post_status'    => 'publish',
-        'posts_per_page' => 5,
-        'no_found_rows'  => true,
-    ), $args ) );
-    if ( ! $query->have_posts() ) {
-        wp_reset_postdata();
+    $limit = isset( $args['posts_per_page'] ) ? (int) $args['posts_per_page'] : 5;
+    $limit = max( 1, min( 20, $limit ) );
+    $query = array( 'status' => 'publish', 'limit' => $limit, 'orderby' => 'date', 'order' => 'DESC' );
+    $include = array();
+    if ( array_key_exists( 'post__in', $args ) ) {
+        $include = array_values( array_unique( array_filter( array_map( 'absint', (array) $args['post__in'] ) ) ) );
+        if ( ! $include ) {
+            return false;
+        }
+        $query['include'] = $include;
+    }
+    // Use the WooCommerce product data store instead of a direct product WP_Query.
+    $products = array_values( array_filter( (array) wc_get_products( $query ), function ( $item ) {
+        return $item instanceof WC_Product
+            && 'publish' === $item->get_status()
+            && ! $item->is_type( 'variation' )
+            && $item->is_visible();
+    } ) );
+    if ( ! $products ) {
         return false;
+    }
+    // When the caller supplies a prioritized sale ID list, keep that ordering.
+    if ( $include && isset( $args['orderby'] ) && 'post__in' === $args['orderby'] ) {
+        $positions = array_flip( $include );
+        usort( $products, function ( $a, $b ) use ( $positions ) {
+            return ( $positions[ $a->get_id() ] ?? PHP_INT_MAX )
+                <=> ( $positions[ $b->get_id() ] ?? PHP_INT_MAX );
+        } );
     }
     $previous_loop = function_exists( 'wc_get_loop_prop' ) ? wc_get_loop_prop( 'columns' ) : 4;
+    $previous_product = isset( $GLOBALS['product'] ) ? $GLOBALS['product'] : null;
+    $previous_post = isset( $GLOBALS['post'] ) ? $GLOBALS['post'] : null;
     if ( function_exists( 'wc_set_loop_prop' ) ) {
         wc_set_loop_prop( 'columns', 5 );
     }
     echo '<ul class="products columns-5">';
-    while ( $query->have_posts() ) {
-        $query->the_post();
+    foreach ( $products as $item ) {
+        $post = get_post( $item->get_id() );
+        if ( ! $post instanceof WP_Post ) { continue; }
+        $GLOBALS['post'] = $post;
+        setup_postdata( $post );
+        $GLOBALS['product'] = $item;
         wc_get_template_part( 'content', 'product' );
     }
     echo '</ul>';
     wp_reset_postdata();
+    if ( null === $previous_post ) {
+        unset( $GLOBALS['post'] );
+    } else {
+        $GLOBALS['post'] = $previous_post;
+    }
+    if ( null === $previous_product ) {
+        unset( $GLOBALS['product'] );
+    } else {
+        $GLOBALS['product'] = $previous_product;
+    }
     if ( function_exists( 'wc_set_loop_prop' ) ) {
         wc_set_loop_prop( 'columns', $previous_loop );
     }
