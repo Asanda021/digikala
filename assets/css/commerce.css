@@ -1,0 +1,14 @@
+/* Phase 3 native WooCommerce integration */
+.bn-stock-state{display:inline-flex;margin-top:7px;align-items:center;font-size:11px;font-weight:800}
+.bn-stock-state.available{color:#17986c}.bn-stock-state.unavailable{color:#d73c50}
+.bn-product-highlights{display:flex;flex-wrap:wrap;gap:9px;margin:17px 0;padding:13px;background:#f7f9fb;border:1px solid #edf0f2;border-radius:12px;font-size:12px;color:#57616f}
+.bn-product-highlights strong{color:#169371}
+.bn-step-note{background:#f2f9fc;border-right:3px solid #269cb3;border-radius:9px;padding:12px;margin:5px 0 18px;color:#366477;font-size:13px}
+.woocommerce .woocommerce-error,.woocommerce .woocommerce-info,.woocommerce .woocommerce-message{border-radius:9px;line-height:1.9}
+.woocommerce-cart .cart_totals,.woocommerce-checkout #order_review{border:1px solid #eceef1;border-radius:12px;padding:15px;background:#fff}
+.woocommerce-cart .cart_totals h2{font-size:19px}
+.woocommerce table.cart td.actions .coupon .input-text{border:1px solid #e2e6ee!important;border-radius:9px;padding:8px!important;min-width:120px}
+.woocommerce-cart .cross-sells ul.products{grid-template-columns:repeat(3,minmax(0,1fr))}
+.woocommerce-checkout .col2-set,.woocommerce-account .woocommerce-MyAccount-content{line-height:1.9}
+.woocommerce .woocommerce-MyAccount-navigation li.is-active a{font-weight:800;color:#e73c55}
+@media(max-width:700px){.woocommerce-cart .cart_totals,.woocommerce-checkout #order_review{padding:10px}.woocommerce-cart .cross-sells ul.products{grid-template-columns:repeat(2,minmax(0,1fr))}}
