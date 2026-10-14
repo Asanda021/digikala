@@ -106,4 +106,59 @@ const flush = () => new Promise(resolve => setImmediate(resolve));
   assert.doesNotThrow(() => app.listeners.click({ target: { nodeType: 3 } }));
   console.log('PASS: non-element click target ignored');
 }
+// A dismissed search result must stay dismissed when an older request returns.
+{
+  const handlers = {};
+  const pending = [];
+  const timers = [];
+  const search = {
+    value: 'کفش',
+    setAttribute() {},
+    addEventListener(name, cb) { handlers['search:' + name] = cb; },
+  };
+  const suggestions = node('results');
+  suggestions.hidden = true;
+  suggestions.contains = () => false;
+  const localStorage = { getItem: () => null, setItem() {} };
+  const document = {
+    createElement: node,
+    getElementById(id) {
+      return id === 'header-search-input' ? search
+        : id === 'bn-search-suggestions' ? suggestions : null;
+    },
+    querySelector: () => null,
+    querySelectorAll: () => [],
+    addEventListener(name, cb) { handlers['document:' + name] = cb; },
+    body: node('body'),
+  };
+  const window = {
+    bazarnamaDiscovery: {
+      ajax: '/mock', nonce: 'test',
+      labels: { noResults: 'بدون نتیجه' },
+    },
+    addEventListener() {},
+    localStorage,
+  };
+  const fetch = () => new Promise(resolve => { pending.push(resolve); });
+  const setTimeout = fn => { timers.push(fn); return timers.length; };
+  const clearTimeout = () => {};
+  vm.runInNewContext(source, {
+    window, document, localStorage, fetch, setTimeout, clearTimeout,
+    URLSearchParams, AbortController,
+  }, { timeout: 2000 });
+  handlers['search:input']();
+  timers[0]();
+  handlers['search:keydown']({ key: 'Escape' });
+  pending[0]({
+    ok: true,
+    json: async () => ({
+      success: true,
+      data: { products: [ { id: 1, title: 'کفش', url: '/', image: '', price: '100' } ] },
+    }),
+  });
+  await flush();
+  assert.equal(suggestions.hidden, true);
+  assert.equal(suggestions.children.length, 0);
+  console.log('PASS: dismissed search does not resurface after AJAX reply');
+}
 console.log('PASS: all deterministic browser-state regressions');
