@@ -4,21 +4,21 @@
   var cfg = window.bazarnamaDiscovery, labels = cfg.labels;
   var keys = { wishlist: 'bazarnama-wishlist-v1', compare: 'bazarnama-compare-v1' };
   var limits = { wishlist: 40, compare: 4 }, memory = { wishlist: [], compare: [] };
-  var persistent = true;
+  var persistent = { wishlist: true, compare: true };
   function read(type) {
-    if (!persistent) return memory[type].slice();
+    if (!persistent[type]) return memory[type].slice();
     try {
       var items = JSON.parse(localStorage.getItem(keys[type]) || '[]');
       if (!Array.isArray(items)) return [];
       return Array.from(new Set(items.map(Number).filter(function (id) {
         return Number.isSafeInteger(id) && id > 0;
       }))).slice(0, limits[type]);
-    } catch (err) { persistent = false; return memory[type].slice(); }
+    } catch (err) { persistent[type] = false; return memory[type].slice(); }
   }
   function save(type, ids) {
     memory[type] = ids.slice();
     try { localStorage.setItem(keys[type], JSON.stringify(ids)); }
-    catch (err) { persistent = false; }
+    catch (err) { persistent[type] = false; }
   }
   function el(tag, css, value) {
     var node = document.createElement(tag);
@@ -67,32 +67,44 @@
   }
   var search = document.getElementById('header-search-input');
   var suggestions = document.getElementById('bn-search-suggestions');
-  var controller = null, timer = null;
+  var controller = null, timer = null, searchGeneration = 0;
   if (search && suggestions) {
     search.setAttribute('aria-controls', 'bn-search-suggestions');
     search.addEventListener('input', function () {
       clearTimeout(timer);
       if (controller) controller.abort();
+      var generation = ++searchGeneration;
       var term = search.value.trim();
       if (term.length < 2) { suggestions.hidden = true; suggestions.replaceChildren(); return; }
       timer = setTimeout(function () {
         controller = new AbortController();
         send('bazarnama_search', { term: term }, controller.signal).then(function (data) {
-          if (search.value.trim() !== term) return;
+          if (generation !== searchGeneration || search.value.trim() !== term) return;
           suggestions.replaceChildren();
           (data.products || []).forEach(function (product) { suggestions.appendChild(productLink(product)); });
           if (!(data.products || []).length) suggestions.appendChild(el('p', 'bn-empty-small', labels.noResults));
           suggestions.hidden = false;
         }).catch(function (err) {
-          if (err.name !== 'AbortError' && search.value.trim() === term) suggestions.hidden = true;
+          if (generation === searchGeneration && err.name !== 'AbortError' && search.value.trim() === term) suggestions.hidden = true;
         });
       }, 250);
     });
     search.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape') suggestions.hidden = true;
+      if (event.key === 'Escape') {
+        searchGeneration++;
+        clearTimeout(timer);
+        if (controller) controller.abort();
+        suggestions.hidden = true;
+        suggestions.replaceChildren();
+      }
     });
     document.addEventListener('click', function (event) {
-      if (!suggestions.contains(event.target) && event.target !== search) suggestions.hidden = true;
+      if (!suggestions.contains(event.target) && event.target !== search) {
+        searchGeneration++;
+        clearTimeout(timer);
+        if (controller) controller.abort();
+        suggestions.hidden = true;
+      }
     });
   }
   var page = document.querySelector('[data-bn-page]');
@@ -177,7 +189,7 @@
     else if (ids.length >= limits[type]) { notify(labels[type === 'compare' ? 'limitCompare' : 'limitWishlist']); return; }
     else ids.push(id);
     save(type, ids); syncButtons(); renderPage();
-    if (!persistent) notify('ذخیره‌سازی مرورگر غیرفعال است؛ فهرست دائمی نخواهد بود.');
+    if (!persistent[type]) notify('ذخیره‌سازی مرورگر غیرفعال است؛ فهرست دائمی نخواهد بود.');
   });
   window.addEventListener('storage', function (event) {
     if (event.key === keys.wishlist || event.key === keys.compare) { syncButtons(); renderPage(); }
