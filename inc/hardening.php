@@ -35,7 +35,40 @@ function bazarnama_seo_meta() {
             $type = 'product';
         }
     }
-    $url = is_singular() ? get_permalink() : home_url( '/' );
+    $url = home_url( '/' );
+    if ( is_singular() ) {
+        $url = get_permalink();
+    } elseif ( function_exists( 'is_shop' ) && is_shop() && function_exists( 'wc_get_page_permalink' ) ) {
+        $shop_url = wc_get_page_permalink( 'shop' );
+        if ( $shop_url ) {
+            $url = $shop_url;
+        }
+    } elseif ( is_category() || is_tag() || is_tax() ) {
+        $term = get_queried_object();
+        if ( $term instanceof WP_Term ) {
+            $term_url = get_term_link( $term );
+            if ( ! is_wp_error( $term_url ) ) {
+                $url = $term_url;
+            }
+            $term_description = term_description( $term );
+            if ( $term_description ) {
+                $description = wp_strip_all_tags( $term_description );
+            }
+        }
+    } elseif ( is_post_type_archive() ) {
+        $archive = get_queried_object();
+        if ( $archive instanceof WP_Post_Type ) {
+            $archive_url = get_post_type_archive_link( $archive->name );
+            if ( $archive_url ) {
+                $url = $archive_url;
+            }
+        }
+    } elseif ( is_home() ) {
+        $posts_page = (int) get_option( 'page_for_posts' );
+        if ( $posts_page ) {
+            $url = get_permalink( $posts_page );
+        }
+    }
     echo "\n" . '<meta property="og:type" content="' . esc_attr( $type ) . '">' . "\n";
     echo '<meta property="og:title" content="' . esc_attr( $title ) . '">' . "\n";
     echo '<meta property="og:description" content="' . esc_attr( wp_strip_all_tags( $description ) ) . '">' . "\n";
