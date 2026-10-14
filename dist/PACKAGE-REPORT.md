@@ -1,15 +1,11 @@
-# گزارش بسته ZIP کاندیدا
+# گزارش بسته کاندیدای ۱.۴.۰
 
-Source commit: 81d876a4b05a6b75e14ac749fb5bfd2fd8887014
-Version: 1.4.0
-Files: 30
-Size: 135330 bytes
-Encoding: ZIP STORE + UTF-8 filenames
-Integrity: central directory + 30 local-entry CRC32 checks passed.
+Source: 9fbf4c05c440541928df29bc7a26362ac60ee748
+ZIP bytes: 136540
+Entries CRC32 verified: 30
+Updated: OG link correction applied to archive and ZIP.
+PHP lint and actual WP staging testing pending.
 
-این بسته از فایل‌های واقعی شاخه توسعه ساخته شده، اما PHP lint و آزمون نصب/پرداخت واقعی انجام نشده است.
-
-## Entries
 - 404.php | 631 bytes | CRC32 5fd4a08e
 - assets/css/commerce.css | 1546 bytes | CRC32 55cd044c
 - assets/css/customer-journey.css | 3805 bytes | CRC32 1c6e7d7f
@@ -27,7 +23,7 @@ Integrity: central directory + 30 local-entry CRC32 checks passed.
 - inc/customer-journey.php | 5132 bytes | CRC32 cd9c2f5a
 - inc/design-customizer.php | 1313 bytes | CRC32 54e3078e
 - inc/discovery.php | 9766 bytes | CRC32 d4d76c5b
-- inc/hardening.php | 3838 bytes | CRC32 524853ae
+- inc/hardening.php | 5048 bytes | CRC32 494a7ad6
 - inc/store-settings.php | 4949 bytes | CRC32 3a7159ff
 - index.php | 1065 bytes | CRC32 747edcdf
 - page.php | 607 bytes | CRC32 aca43ff7
