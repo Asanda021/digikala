@@ -34,7 +34,9 @@ function bazarnama_discovery_product( $product, $attributes = false ) {
     $properties = array();
     if ( $attributes ) {
         foreach ( array_slice( $product->get_attributes(), 0, 12 ) as $attribute ) {
-            if ( ! $attribute->get_visible() ) { continue; }
+            // Variable-product attributes are objects, but variation attributes
+            // can be plain strings. Never call methods on untrusted values.
+            if ( ! $attribute instanceof WC_Product_Attribute || ! $attribute->get_visible() ) { continue; }
             $value = wp_strip_all_tags( $product->get_attribute( $attribute->get_name() ) );
             if ( '' !== $value ) {
                 $properties[] = array( 'name' => wp_strip_all_tags( wc_attribute_label( $attribute->get_name() ) ), 'value' => $value );
@@ -76,13 +78,18 @@ add_action( 'wp_ajax_bazarnama_search', 'bazarnama_ajax_search' );
 add_action( 'wp_ajax_nopriv_bazarnama_search', 'bazarnama_ajax_search' );
 function bazarnama_ajax_products() {
     bazarnama_discovery_nonce();
-    // Bound input size before normalization to limit request work.
+    // Reject nested input; absint( array(...) ) can otherwise become product ID 1.
     $raw_ids = isset( $_POST['ids'] ) && is_array( $_POST['ids'] ) ? array_slice( wp_unslash( $_POST['ids'] ), 0, 40 ) : array();
-    $ids = array_slice( array_unique( array_filter( array_map( 'absint', $raw_ids ) ) ), 0, 40 );
+    $ids = array();
+    foreach ( $raw_ids as $raw_id ) {
+        if ( ! is_scalar( $raw_id ) || ! ctype_digit( (string) $raw_id ) ) { continue; }
+        $id = absint( $raw_id );
+        if ( $id > 0 && ! in_array( $id, $ids, true ) ) { $ids[] = $id; }
+    }
     $items = array();
     foreach ( $ids as $id ) {
         $product = wc_get_product( $id );
-        if ( $product instanceof WC_Product && 'publish' === $product->get_status() && $product->is_visible() ) {
+        if ( $product instanceof WC_Product && ! $product->is_type( 'variation' ) && 'publish' === $product->get_status() && $product->is_visible() ) {
             $items[] = bazarnama_discovery_product( $product, true );
         }
     }
@@ -96,22 +103,17 @@ function bazarnama_filter_value( $key ) {
 }
 function bazarnama_filter_catalog( $query ) {
     if ( is_admin() || ! ( is_shop() || is_product_category() || is_product_tag() ) ) { return; }
-    $min = bazarnama_filter_value( 'bn_min_price' );
-    $max = bazarnama_filter_value( 'bn_max_price' );
+    // WooCommerce handles GET min_price/max_price through its product lookup
+    // table (and tax display rules). Avoid filtering _price post meta here,
+    // which can incorrectly hide variable products and their price ranges.
     $meta = (array) $query->get( 'meta_query' );
-    if ( '' !== $min && is_numeric( $min ) && (float) $min >= 0 && (float) $min <= 1000000000000 ) {
-        $meta[] = array( 'key' => '_price', 'value' => (float) wc_format_decimal( $min ), 'compare' => '>=', 'type' => 'DECIMAL(18,6)' );
-    }
-    if ( '' !== $max && is_numeric( $max ) && (float) $max >= 0 && (float) $max <= 1000000000000 ) {
-        $meta[] = array( 'key' => '_price', 'value' => (float) wc_format_decimal( $max ), 'compare' => '<=', 'type' => 'DECIMAL(18,6)' );
-    }
     if ( '1' === bazarnama_filter_value( 'bn_stock' ) ) {
         $meta[] = array( 'key' => '_stock_status', 'value' => 'instock' );
     }
     if ( $meta ) { $query->set( 'meta_query', $meta ); }
     if ( '1' === bazarnama_filter_value( 'bn_sale' ) ) {
         $sale = array_map( 'absint', (array) wc_get_product_ids_on_sale() );
-        $current = array_filter( array_map( 'absint', (array) $query->get( 'post__in' ) ) );
+        $current = array_map( 'absint', (array) $query->get( 'post__in' ) );
         $allowed = $current ? array_intersect( $current, $sale ) : $sale;
         $query->set( 'post__in', $allowed ? array_values( $allowed ) : array( 0 ) );
     }
@@ -126,8 +128,8 @@ function bazarnama_catalog_filters() {
     }
     ?>
     <form class="bn-catalog-filters" method="get" action="<?php echo esc_url( $action ); ?>" aria-label="<?php esc_attr_e( 'فیلتر محصولات', 'bazarnama' ); ?>">
-        <label><?php esc_html_e( 'از قیمت', 'bazarnama' ); ?><input type="number" min="0" step="any" inputmode="decimal" name="bn_min_price" value="<?php echo esc_attr( bazarnama_filter_value( 'bn_min_price' ) ); ?>"></label>
-        <label><?php esc_html_e( 'تا قیمت', 'bazarnama' ); ?><input type="number" min="0" step="any" inputmode="decimal" name="bn_max_price" value="<?php echo esc_attr( bazarnama_filter_value( 'bn_max_price' ) ); ?>"></label>
+        <label><?php esc_html_e( 'از قیمت', 'bazarnama' ); ?><input type="number" min="0" step="any" inputmode="decimal" name="min_price" value="<?php echo esc_attr( bazarnama_filter_value( 'min_price' ) ); ?>"></label>
+        <label><?php esc_html_e( 'تا قیمت', 'bazarnama' ); ?><input type="number" min="0" step="any" inputmode="decimal" name="max_price" value="<?php echo esc_attr( bazarnama_filter_value( 'max_price' ) ); ?>"></label>
         <label class="bn-filter-check"><input type="checkbox" name="bn_stock" value="1" <?php checked( '1', bazarnama_filter_value( 'bn_stock' ) ); ?>><?php esc_html_e( 'فقط موجودها', 'bazarnama' ); ?></label>
         <label class="bn-filter-check"><input type="checkbox" name="bn_sale" value="1" <?php checked( '1', bazarnama_filter_value( 'bn_sale' ) ); ?>><?php esc_html_e( 'تخفیف‌دار', 'bazarnama' ); ?></label>
         <button type="submit"><?php esc_html_e( 'اعمال فیلتر', 'bazarnama' ); ?></button>
