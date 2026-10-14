@@ -39,8 +39,15 @@ defined( 'ABSPATH' ) || exit;
                 <input id="header-search-input" type="search" name="s" placeholder="<?php esc_attr_e( 'جست‌وجو در محصولات...', 'bazarnama' ); ?>" value="<?php echo esc_attr( get_search_query() ); ?>">
                 <?php if ( class_exists( 'WooCommerce' ) ) : ?><input type="hidden" name="post_type" value="product"><?php endif; ?>
             </form>
+            <?php if ( class_exists( 'WooCommerce' ) ) : ?>
+                <div class="bn-search-suggestions" id="bn-search-suggestions" role="status" aria-live="polite" hidden></div>
+            <?php endif; ?>
         </div>
         <div class="header-actions">
+            <?php if ( class_exists( 'WooCommerce' ) ) : ?>
+                <a class="action-link bn-head-collection" href="<?php echo esc_url( add_query_arg( 'bn_view', 'wishlist', home_url( '/' ) ) ); ?>" aria-label="<?php esc_attr_e( 'علاقه‌مندی‌ها', 'bazarnama' ); ?>" title="<?php esc_attr_e( 'علاقه‌مندی‌ها', 'bazarnama' ); ?>">♡</a>
+                <a class="action-link bn-head-collection" href="<?php echo esc_url( add_query_arg( 'bn_view', 'compare', home_url( '/' ) ) ); ?>" aria-label="<?php esc_attr_e( 'مقایسه محصولات', 'bazarnama' ); ?>" title="<?php esc_attr_e( 'مقایسه محصولات', 'bazarnama' ); ?>">⊞</a>
+            <?php endif; ?>
             <a class="action-link account-link" href="<?php echo esc_url( bazarnama_account_url() ); ?>">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 9h8M8 14h5"/></svg>
                 <?php echo is_user_logged_in() ? esc_html__( 'حساب کاربری', 'bazarnama' ) : esc_html__( 'ورود | ثبت‌نام', 'bazarnama' ); ?>
@@ -60,29 +67,46 @@ defined( 'ABSPATH' ) || exit;
                 </button>
                 <div class="category-panel" id="shop-category-panel" hidden>
                     <strong class="category-panel-title"><?php esc_html_e( 'دسته‌بندی محصولات', 'bazarnama' ); ?></strong>
-                    <div class="category-panel-links">
+                    <div class="category-panel-links bn-mega-grid">
                         <?php
                         if ( taxonomy_exists( 'product_cat' ) ) :
-                            $header_categories = get_terms( array(
+                            $parent_categories = get_terms( array(
                                 'taxonomy'   => 'product_cat',
                                 'hide_empty' => true,
-                                'number'     => 12,
+                                'parent'     => 0,
+                                'number'     => 9,
                                 'orderby'    => 'count',
                                 'order'      => 'DESC',
                                 'exclude'    => array_filter( array( (int) get_option( 'default_product_cat', 0 ) ) ),
                             ) );
-                            if ( ! is_wp_error( $header_categories ) ) :
-                                foreach ( $header_categories as $header_category ) :
-                                    $header_category_url = get_term_link( $header_category );
-                                    if ( is_wp_error( $header_category_url ) ) { continue; }
+                            if ( ! is_wp_error( $parent_categories ) ) :
+                                foreach ( $parent_categories as $parent_category ) :
+                                    $parent_url = get_term_link( $parent_category );
+                                    if ( is_wp_error( $parent_url ) ) { continue; }
+                                    $children = get_terms( array(
+                                        'taxonomy' => 'product_cat',
+                                        'hide_empty' => true,
+                                        'parent' => (int) $parent_category->term_id,
+                                        'number' => 6,
+                                        'orderby' => 'name',
+                                        'order' => 'ASC',
+                                    ) );
                                     ?>
-                                    <a href="<?php echo esc_url( $header_category_url ); ?>"><span aria-hidden="true">◈</span><?php echo esc_html( $header_category->name ); ?><span aria-hidden="true">←</span></a>
+                                    <section class="bn-mega-group">
+                                        <a class="bn-mega-parent" href="<?php echo esc_url( $parent_url ); ?>"><span aria-hidden="true">◈</span><?php echo esc_html( $parent_category->name ); ?><span aria-hidden="true">←</span></a>
+                                        <?php if ( ! is_wp_error( $children ) ) : ?>
+                                            <?php foreach ( $children as $child ) : ?>
+                                                <?php $child_url = get_term_link( $child ); if ( is_wp_error( $child_url ) ) { continue; } ?>
+                                                <a class="bn-mega-child" href="<?php echo esc_url( $child_url ); ?>"><?php echo esc_html( $child->name ); ?></a>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </section>
                                     <?php
                                 endforeach;
                             endif;
                         endif;
                         ?>
-                        <a class="category-all" href="<?php echo esc_url( bazarnama_shop_url() ); ?>"><?php esc_html_e( 'مشاهده همه محصولات', 'bazarnama' ); ?><span aria-hidden="true">←</span></a>
+                        <a class="category-all bn-mega-all" href="<?php echo esc_url( bazarnama_shop_url() ); ?>"><?php esc_html_e( 'مشاهده همه محصولات', 'bazarnama' ); ?><span aria-hidden="true">←</span></a>
                     </div>
                 </div>
             </div>

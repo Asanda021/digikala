@@ -1,0 +1,24 @@
+/* Phase 5: customer experience layered over native WooCommerce flows. */
+.bn-purchase-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0 0 25px;padding:13px;background:#f7f9fb;border:1px solid #edf0f3;border-radius:12px}
+.bn-step{display:flex;align-items:center;justify-content:center;gap:9px;font-weight:700;font-size:12px;color:#9aa2ac}
+.bn-step-number{display:grid;place-items:center;width:29px;height:29px;border:1px solid #e1e5eb;border-radius:50%;font-size:12px;background:#fff}
+.bn-step.is-current{color:#e33652}.bn-step.is-current .bn-step-number{background:#ee4059;color:#fff;border-color:#ee4059}
+.bn-step.is-complete{color:#158d64}.bn-step.is-complete .bn-step-number{color:#138d64;border-color:#9ce2c3;background:#e9f9f0}
+.bn-account-dashboard{background:#f8fafc;border-radius:14px;padding:18px;border:1px solid #eceef1;margin-bottom:18px}
+.bn-account-dashboard h2{font-size:17px;font-weight:900;margin:0 0 9px}.bn-account-dashboard p{font-size:13px;color:#687381}
+.bn-account-links{display:flex;gap:9px;flex-wrap:wrap}.bn-account-links a{padding:8px 13px;border-radius:9px;border:1px solid #dbe4ec;background:#fff;color:#3c697f;font-size:12px;font-weight:800}
+.bn-account-links a:hover{color:#e13e58;border-color:#f3a6b4}
+.bn-tracking{max-width:900px}.bn-tracking-kicker{color:#df3a55;font-size:12px;font-weight:900}.bn-tracking h1{margin:5px 0 13px}.bn-tracking p{font-size:13px}
+.bn-tracking .track_order{max-width:650px;background:#f8fafc;border:1px solid #e9edf2;border-radius:14px;padding:20px;margin:17px 0}
+.bn-tracking .track_order .form-row{float:none!important;width:100%!important;display:block;margin-bottom:13px}
+.bn-tracking .track_order input.input-text{width:100%;border:1px solid #dfe5ea;border-radius:8px;padding:10px;min-height:42px}
+.bn-tracking .track_order button{border:0;border-radius:9px;background:#e83e59;color:#fff;padding:10px 19px}
+.bn-followup-note{background:#f4f9fa;border-right:3px solid #1698ad;border-radius:9px;padding:14px;font-size:13px}
+.bn-followup-note a{color:#be2e4a;font-weight:800}
+.woocommerce-account .woocommerce-MyAccount-navigation{background:#f8fafc;border-radius:12px;padding:12px;border:1px solid #e9edf2}
+.woocommerce-account .woocommerce-MyAccount-content{padding:8px}
+.woocommerce-checkout #payment{border-radius:13px!important}
+.woocommerce-checkout #payment ul.payment_methods{border-color:#e6e9ef}
+.woocommerce-checkout #payment div.form-row{background:#fff;border-radius:0 0 13px 13px}
+.woocommerce-checkout .woocommerce-checkout-review-order-table{border-radius:12px}
+@media(max-width:650px){.bn-purchase-steps{padding:10px 3px;gap:2px}.bn-step{gap:4px;font-size:10px}.bn-step-number{width:24px;height:24px}.bn-account-dashboard{padding:11px}.bn-account-links{flex-direction:column}.bn-tracking .track_order{padding:12px}}

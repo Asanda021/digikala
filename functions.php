@@ -7,7 +7,7 @@
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'BAZARNAMA_VERSION' ) ) {
-    define( 'BAZARNAMA_VERSION', '1.1.0' );
+    define( 'BAZARNAMA_VERSION', '1.3.0' );
 }
 
 function bazarnama_setup() {
@@ -139,3 +139,12 @@ add_filter( 'loop_shop_columns', 'bazarnama_loop_columns', 20 );
 
 /** Editable visual elements for phase two. */
 require_once get_template_directory() . '/inc/design-customizer.php';
+
+/** Phase 3: native WooCommerce catalog, cart and product helpers. */
+require_once get_template_directory() . '/inc/commerce.php';
+
+/** Phase 4 discovery features, safely deactivated without WooCommerce. */
+require_once get_template_directory() . '/inc/discovery.php';
+
+/** Phase 5: native account, order tracking, fulfillment and checkout UX. */
+require_once get_template_directory() . '/inc/customer-journey.php';
