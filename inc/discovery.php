@@ -151,7 +151,7 @@ add_action( 'woocommerce_single_product_summary', 'bazarnama_single_collections'
 
 function bazarnama_collection_template( $template ) {
     if ( is_admin() || ! class_exists( 'WooCommerce' ) || ! is_front_page() ) { return $template; }
-    if ( in_array( bazarnama_filter_value( 'bn_view' ), array( 'wishlist', 'compare' ), true ) ) {
+    if ( in_array( bazarnama_filter_value( 'bn_view' ), array( 'wishlist', 'compare', 'track' ), true ) ) {
         return get_template_directory() . '/templates/collection.php';
     }
     return $template;

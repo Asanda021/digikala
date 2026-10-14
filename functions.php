@@ -145,3 +145,6 @@ require_once get_template_directory() . '/inc/commerce.php';
 
 /** Phase 4 discovery features, safely deactivated without WooCommerce. */
 require_once get_template_directory() . '/inc/discovery.php';
+
+/** Phase 5: native account, order tracking, fulfillment and checkout UX. */
+require_once get_template_directory() . '/inc/customer-journey.php';

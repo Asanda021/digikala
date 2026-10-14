@@ -30,6 +30,7 @@ defined( 'ABSPATH' ) || exit;
                 <ul>
                     <li><a href="<?php echo esc_url( bazarnama_account_url() ); ?>"><?php esc_html_e( 'حساب من', 'bazarnama' ); ?></a></li>
                     <li><a href="<?php echo esc_url( bazarnama_cart_url() ); ?>"><?php esc_html_e( 'سبد خرید', 'bazarnama' ); ?></a></li>
+                    <li><a href="<?php echo esc_url( add_query_arg( 'bn_view', 'track', home_url( '/' ) ) ); ?>"><?php esc_html_e( 'پیگیری سفارش', 'bazarnama' ); ?></a></li>
                 </ul>
             </div>
         </div>
