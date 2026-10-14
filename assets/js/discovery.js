@@ -4,20 +4,21 @@
   var cfg = window.bazarnamaDiscovery, labels = cfg.labels;
   var keys = { wishlist: 'bazarnama-wishlist-v1', compare: 'bazarnama-compare-v1' };
   var limits = { wishlist: 40, compare: 4 }, memory = { wishlist: [], compare: [] };
-  var persistent = true;
+  var persistent = { wishlist: true, compare: true };
   function read(type) {
+    if (!persistent[type]) return memory[type].slice();
     try {
       var items = JSON.parse(localStorage.getItem(keys[type]) || '[]');
       if (!Array.isArray(items)) return [];
       return Array.from(new Set(items.map(Number).filter(function (id) {
         return Number.isSafeInteger(id) && id > 0;
       }))).slice(0, limits[type]);
-    } catch (err) { persistent = false; return memory[type].slice(); }
+    } catch (err) { persistent[type] = false; return memory[type].slice(); }
   }
   function save(type, ids) {
     memory[type] = ids.slice();
     try { localStorage.setItem(keys[type], JSON.stringify(ids)); }
-    catch (err) { persistent = false; }
+    catch (err) { persistent[type] = false; }
   }
   function el(tag, css, value) {
     var node = document.createElement(tag);
@@ -66,30 +67,44 @@
   }
   var search = document.getElementById('header-search-input');
   var suggestions = document.getElementById('bn-search-suggestions');
-  var controller = null, timer = null;
+  var controller = null, timer = null, searchGeneration = 0;
   if (search && suggestions) {
     search.setAttribute('aria-controls', 'bn-search-suggestions');
     search.addEventListener('input', function () {
       clearTimeout(timer);
       if (controller) controller.abort();
+      var generation = ++searchGeneration;
       var term = search.value.trim();
       if (term.length < 2) { suggestions.hidden = true; suggestions.replaceChildren(); return; }
       timer = setTimeout(function () {
         controller = new AbortController();
         send('bazarnama_search', { term: term }, controller.signal).then(function (data) {
-          if (search.value.trim() !== term) return;
+          if (generation !== searchGeneration || search.value.trim() !== term) return;
           suggestions.replaceChildren();
           (data.products || []).forEach(function (product) { suggestions.appendChild(productLink(product)); });
           if (!(data.products || []).length) suggestions.appendChild(el('p', 'bn-empty-small', labels.noResults));
           suggestions.hidden = false;
-        }).catch(function (err) { if (err.name !== 'AbortError') suggestions.hidden = true; });
+        }).catch(function (err) {
+          if (generation === searchGeneration && err.name !== 'AbortError' && search.value.trim() === term) suggestions.hidden = true;
+        });
       }, 250);
     });
     search.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape') suggestions.hidden = true;
+      if (event.key === 'Escape') {
+        searchGeneration++;
+        clearTimeout(timer);
+        if (controller) controller.abort();
+        suggestions.hidden = true;
+        suggestions.replaceChildren();
+      }
     });
     document.addEventListener('click', function (event) {
-      if (!suggestions.contains(event.target) && event.target !== search) suggestions.hidden = true;
+      if (!suggestions.contains(event.target) && event.target !== search) {
+        searchGeneration++;
+        clearTimeout(timer);
+        if (controller) controller.abort();
+        suggestions.hidden = true;
+      }
     });
   }
   var page = document.querySelector('[data-bn-page]');
@@ -103,7 +118,7 @@
   function renderTable(products, target) {
     var wrap = el('div', 'bn-compare-scroll'), table = el('table', 'bn-compare-table');
     var headings = [ ['price', 'قیمت'], ['stock', 'موجودی'], ['sku', 'شناسه کالا'] ];
-    var attrs = {};
+    var attrs = Object.create(null);
     products.forEach(function (product) {
       (product.attributes || []).forEach(function (attribute) { attrs[attribute.name] = true; });
     });
@@ -126,8 +141,10 @@
     });
     wrap.appendChild(table); target.appendChild(wrap);
   }
+  var collectionRequestVersion = 0;
   function renderPage() {
     if (!page) return;
+    var requestVersion = ++collectionRequestVersion;
     var type = page.getAttribute('data-bn-page'), target = document.getElementById('bn-collection-results');
     var ids = read(type); target.replaceChildren();
     if (!ids.length) {
@@ -136,6 +153,7 @@
     }
     target.appendChild(el('p', 'bn-collection-loading', 'در حال دریافت اطلاعات...'));
     send('bazarnama_products', { ids: ids }).then(function (data) {
+      if (requestVersion !== collectionRequestVersion) return;
       target.replaceChildren();
       var products = data.products || [], valid = products.map(function (p) { return Number(p.id); });
       if (JSON.stringify(ids) !== JSON.stringify(valid)) { save(type, valid); syncButtons(); }
@@ -154,10 +172,14 @@
         });
         target.appendChild(grid);
       }
-    }).catch(function () { target.replaceChildren(el('p', 'bn-collection-empty', labels.error)); });
+    }).catch(function () {
+      if (requestVersion !== collectionRequestVersion) return;
+      target.replaceChildren(el('p', 'bn-collection-empty', labels.error));
+    });
   }
   document.addEventListener('click', function (event) {
-    var button = event.target.closest('[data-bn-collection][data-product-id]');
+    var button = event.target && typeof event.target.closest === 'function'
+      ? event.target.closest('[data-bn-collection][data-product-id]') : null;
     if (!button) return;
     var type = button.getAttribute('data-bn-collection');
     var id = Number(button.getAttribute('data-product-id'));
@@ -167,7 +189,7 @@
     else if (ids.length >= limits[type]) { notify(labels[type === 'compare' ? 'limitCompare' : 'limitWishlist']); return; }
     else ids.push(id);
     save(type, ids); syncButtons(); renderPage();
-    if (!persistent) notify('ذخیره‌سازی مرورگر غیرفعال است؛ فهرست دائمی نخواهد بود.');
+    if (!persistent[type]) notify('ذخیره‌سازی مرورگر غیرفعال است؛ فهرست دائمی نخواهد بود.');
   });
   window.addEventListener('storage', function (event) {
     if (event.key === keys.wishlist || event.key === keys.compare) { syncButtons(); renderPage(); }
