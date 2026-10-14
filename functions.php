@@ -151,3 +151,6 @@ require_once get_template_directory() . '/inc/discovery.php';
 require_once get_template_directory() . '/inc/customer-journey.php';
 
 require_once get_template_directory() . '/inc/store-settings.php';
+
+/** Phase 7: SEO metadata, conditional styles and security guards. */
+require_once get_template_directory() . '/inc/hardening.php';
